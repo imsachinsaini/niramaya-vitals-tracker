@@ -1,4 +1,4 @@
-const CACHE_NAME = "niramaya-pwa-v11";
+const CACHE_NAME = "niramaya-pwa-v12";
 const ASSETS = [
   "./",
   "./index.html",

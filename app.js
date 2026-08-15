@@ -522,7 +522,7 @@ async function syncWithSheet(showAlert = false) {
 }
 
 function canUseVercelSync() {
-  return location.protocol.startsWith("http") && !["localhost", "127.0.0.1", "0.0.0.0"].includes(location.hostname);
+  return location.hostname.endsWith(".vercel.app");
 }
 
 async function syncViaVercel() {
@@ -533,13 +533,22 @@ async function syncViaVercel() {
     },
     body: JSON.stringify({ action: "sync", entries })
   });
-  const result = await response.json();
+  const result = await parseJsonResponse(response, "Vercel sync did not return JSON.");
   if (!result.ok) {
     throw new Error(result.error || "Vercel sync failed.");
   }
   mergeEntries(result.entries || []);
   render();
   syncStatus.textContent = `Synced ${entries.length} readings at ${new Date().toLocaleTimeString()}.`;
+}
+
+async function parseJsonResponse(response, fallbackMessage) {
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(`${fallbackMessage} This usually means the app is not running on Vercel or the API is not deployed.`);
+  }
 }
 
 function testEndpoint(url) {
