@@ -2,7 +2,7 @@
 
 A vital log book developed by Sachin Saini.
 
-Niramaya is a small installable web app for recording vitals by patient: BP, SpO2, pulse, temperature in Fahrenheit, notes, date, and time. Reading times are saved to Google Sheets with an IST offset for readability. It keeps a local backup in the browser, can sync to one shared Google Sheet through Google Apps Script, and shows the full synced record history without a row limit.
+Niramaya is a small installable web app for recording vitals by patient: BP, SpO2, pulse, temperature in Fahrenheit, notes, date, and time. Reading times are saved to Google Sheets with an IST offset for readability. It keeps a local backup in the browser, can sync to one shared Google Sheet through Google Apps Script, shows the full synced record history without a row limit, and keeps trend graphs collapsed until needed.
 
 ## Files
 
