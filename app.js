@@ -257,7 +257,7 @@ function updateSummary() {
 }
 
 function renderHistory() {
-  const newestFirst = [...entriesForViewPatient()].sort((a, b) => new Date(b.measuredAt) - new Date(a.measuredAt));
+  const newestFirst = [...entries].sort((a, b) => new Date(b.measuredAt) - new Date(a.measuredAt));
   historyBody.innerHTML = "";
   emptyState.hidden = newestFirst.length > 0;
 
