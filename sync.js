@@ -24,6 +24,10 @@ export default async function handler(request, response) {
         const result = await readFromAppsScript(scriptUrl, accessCode);
         return response.status(200).json(result);
       }
+      if (action === "debug") {
+        const result = await debugAppsScript(scriptUrl, accessCode);
+        return response.status(200).json(result);
+      }
       return response.status(400).json({ ok: false, error: "Unsupported action." });
     }
 
@@ -44,6 +48,66 @@ export default async function handler(request, response) {
       ok: false,
       error: error.message || "Sync failed."
     });
+  }
+}
+
+async function debugAppsScript(scriptUrl, accessCode) {
+  const parsed = safeUrl(scriptUrl);
+  const pingUrl = parsed ? new URL(parsed.toString()) : null;
+  const readUrl = parsed ? new URL(parsed.toString()) : null;
+
+  if (pingUrl) pingUrl.searchParams.set("action", "ping");
+  if (readUrl) {
+    readUrl.searchParams.set("action", "read");
+    readUrl.searchParams.set("accessCode", accessCode);
+    readUrl.searchParams.set("t", Date.now().toString());
+  }
+
+  return {
+    ok: true,
+    env: {
+      hasScriptUrl: Boolean(scriptUrl),
+      hasAccessCode: Boolean(accessCode),
+      scriptUrlHost: parsed ? parsed.host : null,
+      scriptUrlPathEndsWithExec: parsed ? parsed.pathname.endsWith("/exec") : false
+    },
+    ping: pingUrl ? await inspectUpstream(pingUrl.toString()) : null,
+    read: readUrl ? await inspectUpstream(readUrl.toString()) : null
+  };
+}
+
+function safeUrl(value) {
+  try {
+    return new URL(String(value || "").trim());
+  } catch {
+    return null;
+  }
+}
+
+async function inspectUpstream(url) {
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: { "Accept": "application/json" },
+      redirect: "follow"
+    });
+    const text = await response.text();
+    return {
+      status: response.status,
+      ok: response.ok,
+      contentType: response.headers.get("content-type"),
+      looksLikeHtml: text.trim().startsWith("<"),
+      startsWith: text.trim().slice(0, 120)
+    };
+  } catch (error) {
+    return {
+      status: null,
+      ok: false,
+      contentType: null,
+      looksLikeHtml: false,
+      startsWith: "",
+      error: error.message
+    };
   }
 }
 

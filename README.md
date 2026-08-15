@@ -51,6 +51,8 @@ Expected response:
 {"ok":true,"message":"Niramaya Vercel sync endpoint is running."}
 ```
 
+For troubleshooting, open `https://your-vercel-app.vercel.app/api/sync?action=debug`.
+
 For GitHub Pages:
 
 1. Create a public GitHub repository, for example `niramaya`.
