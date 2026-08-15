@@ -24,6 +24,10 @@ export default async function handler(request, response) {
         const result = await readFromAppsScript(scriptUrl, accessCode);
         return response.status(200).json(result);
       }
+      if (action === "debug") {
+        const result = await debugAppsScript(scriptUrl, accessCode);
+        return response.status(200).json(result);
+      }
       return response.status(400).json({ ok: false, error: "Unsupported action." });
     }
 
@@ -47,6 +51,66 @@ export default async function handler(request, response) {
   }
 }
 
+async function debugAppsScript(scriptUrl, accessCode) {
+  const parsed = safeUrl(scriptUrl);
+  const pingUrl = parsed ? new URL(parsed.toString()) : null;
+  const readUrl = parsed ? new URL(parsed.toString()) : null;
+
+  if (pingUrl) pingUrl.searchParams.set("action", "ping");
+  if (readUrl) {
+    readUrl.searchParams.set("action", "read");
+    readUrl.searchParams.set("accessCode", accessCode);
+    readUrl.searchParams.set("t", Date.now().toString());
+  }
+
+  return {
+    ok: true,
+    env: {
+      hasScriptUrl: Boolean(scriptUrl),
+      hasAccessCode: Boolean(accessCode),
+      scriptUrlHost: parsed ? parsed.host : null,
+      scriptUrlPathEndsWithExec: parsed ? parsed.pathname.endsWith("/exec") : false
+    },
+    ping: pingUrl ? await inspectUpstream(pingUrl.toString()) : null,
+    read: readUrl ? await inspectUpstream(readUrl.toString()) : null
+  };
+}
+
+function safeUrl(value) {
+  try {
+    return new URL(String(value || "").trim());
+  } catch {
+    return null;
+  }
+}
+
+async function inspectUpstream(url) {
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: { "Accept": "application/json" },
+      redirect: "follow"
+    });
+    const text = await response.text();
+    return {
+      status: response.status,
+      ok: response.ok,
+      contentType: response.headers.get("content-type"),
+      looksLikeHtml: text.trim().startsWith("<"),
+      startsWith: text.trim().slice(0, 120)
+    };
+  } catch (error) {
+    return {
+      status: null,
+      ok: false,
+      contentType: null,
+      looksLikeHtml: false,
+      startsWith: "",
+      error: error.message
+    };
+  }
+}
+
 async function writeToAppsScript(scriptUrl, accessCode, entries) {
   const payload = JSON.stringify({
     action: "sync",
@@ -63,7 +127,7 @@ async function writeToAppsScript(scriptUrl, accessCode, entries) {
     },
     body: form.toString()
   });
-  const result = await response.json();
+  const result = await parseUpstreamJson(response, "Google Apps Script write");
   if (!result.ok) {
     throw new Error(result.error || "Google Sheet write failed.");
   }
@@ -81,9 +145,21 @@ async function readFromAppsScript(scriptUrl, accessCode) {
       "Accept": "application/json"
     }
   });
-  const result = await response.json();
+  const result = await parseUpstreamJson(response, "Google Apps Script read");
   if (!result.ok) {
     throw new Error(result.error || "Google Sheet read failed.");
   }
   return result;
+}
+
+async function parseUpstreamJson(response, label) {
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    const hint = text.trim().startsWith("<!DOCTYPE")
+      ? "It returned an HTML page. Check that NIRAMAYA_SCRIPT_URL is the Apps Script Web App URL ending in /exec, and that the deployment access is Anyone."
+      : "It did not return valid JSON.";
+    throw new Error(`${label} failed. ${hint}`);
+  }
 }
