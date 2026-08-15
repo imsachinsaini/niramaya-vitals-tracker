@@ -475,7 +475,7 @@ function renderSettings() {
   accessCode.value = settings.rememberAccess ? settings.accessCode || "" : "";
   syncStatus.textContent = settings.sheetUrl
     ? "Google Sheet sync is configured. New saves will sync when internet is available."
-    : "Local backup is active. Add the Google Sheet endpoint to sync across devices.";
+    : "Local backup is active. Vercel sync is automatic when configured.";
 }
 
 function normalizeSheetUrl(value) {
@@ -494,17 +494,22 @@ function render() {
 async function syncWithSheet(showAlert = false) {
   const url = normalizeSheetUrl(settings.sheetUrl);
   const code = (accessCode.value || settings.accessCode || "").trim();
-  if (!url) {
-    if (showAlert) alert("Add the Google Apps Script URL first.");
-    return;
-  }
-  if (!code) {
-    if (showAlert) alert("Enter the access code for the sheet.");
-    return;
-  }
 
   syncStatus.textContent = "Syncing with Google Sheet...";
   try {
+    if (canUseVercelSync()) {
+      await syncViaVercel();
+      if (showAlert) alert("Sync complete.");
+      return;
+    }
+    if (!url) {
+      if (showAlert) alert("Add the Google Apps Script URL first.");
+      return;
+    }
+    if (!code) {
+      if (showAlert) alert("Enter the access code for the sheet.");
+      return;
+    }
     await testEndpoint(url);
     await postToSheet(url, { action: "sync", accessCode: code, entries });
     await new Promise((resolve) => setTimeout(resolve, 1200));
@@ -514,6 +519,27 @@ async function syncWithSheet(showAlert = false) {
     syncStatus.textContent = "Sync failed. Check the Apps Script URL, access code, deployment access, and internet.";
     if (showAlert) alert(error.message || "Sync failed.");
   }
+}
+
+function canUseVercelSync() {
+  return location.protocol.startsWith("http") && !["localhost", "127.0.0.1", "0.0.0.0"].includes(location.hostname);
+}
+
+async function syncViaVercel() {
+  const response = await fetch("/api/sync", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ action: "sync", entries })
+  });
+  const result = await response.json();
+  if (!result.ok) {
+    throw new Error(result.error || "Vercel sync failed.");
+  }
+  mergeEntries(result.entries || []);
+  render();
+  syncStatus.textContent = `Synced ${entries.length} readings at ${new Date().toLocaleTimeString()}.`;
 }
 
 function testEndpoint(url) {

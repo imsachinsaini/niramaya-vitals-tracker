@@ -9,6 +9,7 @@ Niramaya is a small installable web app for recording vitals by patient: BP, SpO
 - `index.html`, `styles.css`, `app.js`: the web app
 - `manifest.webmanifest`, `service-worker.js`, icons: home-screen install/offline assets
 - `google-apps-script/Code.gs`: Google Sheet sync endpoint
+- `api/sync.js`: Vercel serverless sync proxy for reliable phone sync
 
 ## Google Sheet Setup
 
@@ -32,6 +33,24 @@ If you change `Code.gs` later, create a new Apps Script deployment version. Edit
 
 This is a static app, so it can be hosted free on GitHub Pages, Cloudflare Pages, Vercel, Netlify, or OpenAI Sites.
 
+## Vercel Setup
+
+Vercel is recommended for iPhone sync because the app can use `/api/sync` instead of calling Google Apps Script directly from the phone browser.
+
+1. Push or upload this folder to GitHub.
+2. In Vercel, import the GitHub repository.
+3. In the Vercel project, open `Settings > Environment Variables`.
+4. Add `NIRAMAYA_SCRIPT_URL` with your Apps Script `/exec` URL.
+5. Add `NIRAMAYA_ACCESS_CODE` with the same access code set in Apps Script script properties.
+6. Redeploy the Vercel project.
+7. Open `https://your-vercel-app.vercel.app/api/sync?action=ping`.
+
+Expected response:
+
+```json
+{"ok":true,"message":"Niramaya Vercel sync endpoint is running."}
+```
+
 For GitHub Pages:
 
 1. Create a public GitHub repository, for example `niramaya`.
@@ -44,8 +63,8 @@ For GitHub Pages:
 ## Storage Model
 
 - Without sync settings, readings stay only in the current browser.
-- With Google Sheet sync, readings are saved locally and merged with the shared sheet.
-- The app link can be opened anywhere, but each new device needs the Apps Script URL and access code once.
+- On Vercel, sync uses server-side environment variables and each device does not need the Apps Script URL.
+- Outside Vercel, manual Google Sheet sync can still be configured inside Sync settings.
 
 ## Medical Note
 
