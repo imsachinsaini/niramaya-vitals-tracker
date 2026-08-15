@@ -141,12 +141,14 @@ h2 {
   padding: 16px;
 }
 
-.settings-panel {
+.settings-panel,
+.chart-panel {
   padding: 0;
   overflow: hidden;
 }
 
-.settings-panel summary {
+.settings-panel summary,
+.chart-panel summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -158,14 +160,16 @@ h2 {
   font-weight: 800;
 }
 
-.settings-panel summary small {
+.settings-panel summary small,
+.chart-panel summary small {
   color: var(--muted);
   font-size: 0.82rem;
   font-weight: 700;
   text-align: right;
 }
 
-.settings-content {
+.settings-content,
+.chart-content {
   border-top: 1px solid var(--line);
   padding: 16px;
 }
@@ -211,6 +215,39 @@ select:focus,
 textarea:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(18, 107, 114, 0.15);
+}
+
+.bp-field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+.bp-field legend {
+  padding: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.bp-inputs {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.bp-inputs span {
+  color: var(--muted);
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.bp-inputs input {
+  text-align: center;
 }
 
 .settings-grid {
@@ -510,7 +547,8 @@ tr:last-child td {
 
   .section-head,
   .alert-strip,
-  .settings-panel summary {
+  .settings-panel summary,
+  .chart-panel summary {
     align-items: stretch;
     flex-direction: column;
   }

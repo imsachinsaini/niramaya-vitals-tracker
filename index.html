@@ -84,14 +84,14 @@
                 <span>Date & time</span>
                 <input id="measuredAt" type="datetime-local" required>
               </label>
-              <label>
-                <span>Systolic BP</span>
-                <input id="systolic" type="number" inputmode="numeric" min="60" max="260" placeholder="120" required>
-              </label>
-              <label>
-                <span>Diastolic BP</span>
-                <input id="diastolic" type="number" inputmode="numeric" min="30" max="180" placeholder="80" required>
-              </label>
+              <fieldset class="bp-field">
+                <legend>Blood pressure</legend>
+                <div class="bp-inputs">
+                  <input id="systolic" type="number" inputmode="numeric" min="60" max="260" placeholder="120" aria-label="Systolic blood pressure" required>
+                  <span aria-hidden="true">/</span>
+                  <input id="diastolic" type="number" inputmode="numeric" min="30" max="180" placeholder="80" aria-label="Diastolic blood pressure" required>
+                </div>
+              </fieldset>
               <label>
                 <span>SpO2 %</span>
                 <input id="spo2" type="number" inputmode="numeric" min="50" max="100" placeholder="98" required>
@@ -135,56 +135,62 @@
           </article>
         </section>
 
-        <section class="chart-panel" aria-labelledby="trendTitle">
-          <div class="section-head">
-            <div>
-              <h2 id="trendTitle">Trends</h2>
-              <p>Each chart uses its own scale for the selected patient.</p>
+        <details class="chart-panel" id="trendsDetails">
+          <summary>
+            <span>Trends</span>
+            <small>Tap to view graphs</small>
+          </summary>
+          <div class="chart-content" aria-labelledby="trendTitle">
+            <div class="section-head">
+              <div>
+                <h2 id="trendTitle">Trends</h2>
+                <p>Each chart uses its own scale for the selected patient.</p>
+              </div>
+            </div>
+            <div class="trend-controls" aria-label="Trend filters">
+              <label>
+                <span>View patient</span>
+                <select id="viewPatientSelect"></select>
+              </label>
+              <label>
+                <span>Duration</span>
+                <select id="rangeSelect">
+                  <option value="24">Last 24 hours</option>
+                  <option value="168">Last week</option>
+                  <option value="720">Last month</option>
+                  <option value="all">All readings</option>
+                  <option value="custom">Custom dates</option>
+                </select>
+              </label>
+              <label class="custom-range" id="customFromWrap" hidden>
+                <span>From</span>
+                <input id="customFrom" type="date">
+              </label>
+              <label class="custom-range" id="customToWrap" hidden>
+                <span>To</span>
+                <input id="customTo" type="date">
+              </label>
+            </div>
+            <div class="charts-grid">
+              <article class="mini-chart">
+                <h3>Blood Pressure</h3>
+                <canvas id="bpChart" width="700" height="320" aria-label="Blood pressure trend chart"></canvas>
+              </article>
+              <article class="mini-chart">
+                <h3>SpO2</h3>
+                <canvas id="spo2Chart" width="700" height="320" aria-label="SpO2 trend chart"></canvas>
+              </article>
+              <article class="mini-chart">
+                <h3>Pulse</h3>
+                <canvas id="pulseChart" width="700" height="320" aria-label="Pulse trend chart"></canvas>
+              </article>
+              <article class="mini-chart">
+                <h3>Temperature</h3>
+                <canvas id="tempChart" width="700" height="320" aria-label="Temperature trend chart"></canvas>
+              </article>
             </div>
           </div>
-          <div class="trend-controls" aria-label="Trend filters">
-            <label>
-              <span>View patient</span>
-              <select id="viewPatientSelect"></select>
-            </label>
-            <label>
-              <span>Duration</span>
-              <select id="rangeSelect">
-                <option value="24">Last 24 hours</option>
-                <option value="168">Last week</option>
-                <option value="720">Last month</option>
-                <option value="all">All readings</option>
-                <option value="custom">Custom dates</option>
-              </select>
-            </label>
-            <label class="custom-range" id="customFromWrap" hidden>
-              <span>From</span>
-              <input id="customFrom" type="date">
-            </label>
-            <label class="custom-range" id="customToWrap" hidden>
-              <span>To</span>
-              <input id="customTo" type="date">
-            </label>
-          </div>
-          <div class="charts-grid">
-            <article class="mini-chart">
-              <h3>Blood Pressure</h3>
-              <canvas id="bpChart" width="700" height="320" aria-label="Blood pressure trend chart"></canvas>
-            </article>
-            <article class="mini-chart">
-              <h3>SpO2</h3>
-              <canvas id="spo2Chart" width="700" height="320" aria-label="SpO2 trend chart"></canvas>
-            </article>
-            <article class="mini-chart">
-              <h3>Pulse</h3>
-              <canvas id="pulseChart" width="700" height="320" aria-label="Pulse trend chart"></canvas>
-            </article>
-            <article class="mini-chart">
-              <h3>Temperature</h3>
-              <canvas id="tempChart" width="700" height="320" aria-label="Temperature trend chart"></canvas>
-            </article>
-          </div>
-        </section>
+        </details>
 
         <section class="history-panel" aria-labelledby="historyTitle">
           <div class="section-head">

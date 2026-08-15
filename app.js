@@ -12,6 +12,7 @@ const customFrom = document.querySelector("#customFrom");
 const customTo = document.querySelector("#customTo");
 const customFromWrap = document.querySelector("#customFromWrap");
 const customToWrap = document.querySelector("#customToWrap");
+const trendsDetails = document.querySelector("#trendsDetails");
 const systolic = document.querySelector("#systolic");
 const diastolic = document.querySelector("#diastolic");
 const spo2 = document.querySelector("#spo2");
@@ -689,6 +690,9 @@ rangeSelect.addEventListener("change", () => {
 
 customFrom.addEventListener("change", renderAllCharts);
 customTo.addEventListener("change", renderAllCharts);
+trendsDetails.addEventListener("toggle", () => {
+  if (trendsDetails.open) requestAnimationFrame(renderAllCharts);
+});
 
 saveSettingsButton.addEventListener("click", () => {
   settings = {
