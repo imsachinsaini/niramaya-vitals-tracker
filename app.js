@@ -1,5 +1,4 @@
 const STORAGE_KEY = "niramaya.vitals.entries.v2";
-const PATIENTS_KEY = "niramaya.patients.v1";
 const SETTINGS_KEY = "niramaya.sync.settings.v1";
 
 const form = document.querySelector("#vitalsForm");
@@ -175,15 +174,14 @@ function mergeEntries(incoming) {
   entries = [...byId.values()];
   refreshPatients();
   saveJson(STORAGE_KEY, entries);
-  saveJson(PATIENTS_KEY, patients);
 }
 
 function refreshPatients() {
-  const saved = loadJson(PATIENTS_KEY, []);
   const entryPatients = entries.map((entry) => entry.patient).filter(Boolean);
-  patients = [...new Set([...saved, ...entryPatients])]
+  patients = [...new Set(entryPatients)]
     .filter((patient) => patient !== "Mother" || entryPatients.includes("Mother"))
     .sort();
+  localStorage.removeItem("niramaya.patients.v1");
   if (selectedViewPatient && !patients.includes(selectedViewPatient)) {
     selectedViewPatient = "";
   }
@@ -671,7 +669,6 @@ form.addEventListener("submit", async (event) => {
   patients = [...new Set([...patients, entry.patient])].sort();
   selectedViewPatient = entry.patient;
   saveJson(STORAGE_KEY, entries);
-  saveJson(PATIENTS_KEY, patients);
   resetForm(entry.patient);
   render();
   await syncWithSheet(false);

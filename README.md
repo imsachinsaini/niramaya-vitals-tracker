@@ -67,6 +67,7 @@ For GitHub Pages:
 - Without sync settings, readings stay only in the current browser.
 - On Vercel, sync uses server-side environment variables and each device does not need the Apps Script URL.
 - Outside Vercel, manual Google Sheet sync can still be configured inside Sync settings.
+- Trend patient names are derived only from loaded records, not from a separate saved patient list.
 
 ## Medical Note
 
